@@ -18,7 +18,7 @@ class MessageBubble extends StatelessWidget {
     final timeStr = DateFormat('h:mm a').format(message.timestamp);
     final text = message.text;
 
-    List<InlineSpan> _buildTextSpans() {
+    List<InlineSpan> buildTextSpans() {
       if (highlightText.isEmpty) {
         return [
           TextSpan(
@@ -105,7 +105,7 @@ class MessageBubble extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
-            RichText(text: TextSpan(children: _buildTextSpans())),
+            RichText(text: TextSpan(children: buildTextSpans())),
             const SizedBox(height: 4),
             Text(
               timeStr,

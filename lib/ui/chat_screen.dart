@@ -85,6 +85,14 @@ class _ChatScreenState extends State<ChatScreen> {
                   final searchQuery = chatProvider.searchQuery;
 
                   if (messages.isEmpty) {
+                    if (searchQuery.isNotEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No results found',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      );
+                    }
                     return const Center(
                       child: Text(
                         'No messages yet',
