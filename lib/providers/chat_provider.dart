@@ -49,6 +49,12 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> clearMessages() async {
+    await _storageService.clear();
+    _messages = [];
+    notifyListeners();
+  }
+
   void searchMessages(String query) {
     _searchQuery = query;
     notifyListeners();

@@ -6,16 +6,23 @@ class StorageService {
 
   Future<void> init() async {
     await Hive.initFlutter();
-    Hive.registerAdapter(MessageAdapter());
+    if (!Hive.isAdapterRegistered(0)) {
+      Hive.registerAdapter(MessageAdapter());
+    }
     await Hive.openBox<Message>(_boxName);
   }
 
   Box<Message> get _box => Hive.box<Message>(_boxName);
 
   List<Message> getMessages() {
-    // Return all, sort by timestamp if needed (though we'll append likely)
     final msgs = _box.values.toList();
     msgs.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    // Extra safety protection
+    if (msgs.length > 20) {
+      return msgs.sublist(msgs.length - 20);
+    }
+
     return msgs;
   }
 
