@@ -56,6 +56,7 @@ class _ChatInputState extends State<ChatInput> {
             Expanded(
               child: TextField(
                 controller: _controller,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   hintText: 'Type a message...',
                   filled: true,
