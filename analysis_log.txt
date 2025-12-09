@@ -1,0 +1,4 @@
+Analyzing flutter_application_1...                              
+
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui\widgets\chat_input.dart:35:33 - deprecated_member_use
+
