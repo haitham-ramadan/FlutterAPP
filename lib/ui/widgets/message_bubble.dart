@@ -19,7 +19,7 @@ class MessageBubble extends StatelessWidget {
     final text = message.text;
 
     List<InlineSpan> buildTextSpans() {
-      if (highlightText.isEmpty) {
+      if (highlightText.trim().isEmpty) {
         return [
           TextSpan(
             text: text,
@@ -31,54 +31,99 @@ class MessageBubble extends StatelessWidget {
         ];
       }
 
-      final spans = <InlineSpan>[];
-      final lowerText = text.toLowerCase();
-      final lowerHighlight = highlightText.toLowerCase();
-      int start = 0;
-      int indexOfHighlight;
+      final terms = highlightText
+          .trim()
+          .toLowerCase()
+          .split(' ')
+          .where((t) => t.isNotEmpty)
+          .toSet() // Use set to avoid duplicate checks for same word
+          .toList();
 
-      while ((indexOfHighlight = lowerText.indexOf(lowerHighlight, start)) !=
-          -1) {
-        if (indexOfHighlight > start) {
+      if (terms.isEmpty) {
+        return [
+          TextSpan(
+            text: text,
+            style: TextStyle(
+              color: isMe ? Colors.white : Colors.black87,
+              fontSize: 16,
+            ),
+          ),
+        ];
+      }
+
+      final lowerText = text.toLowerCase();
+      final List<TextSpan> spans = [];
+      int currentIndex = 0;
+
+      // We need to find all matches for all terms and sort them by position
+      // Simple approach: Create a boolean mask or just find the "next earliest match" iteratively
+      // Iterative approach: find the earliest occurrence of ANY term after currentIndex
+
+      while (currentIndex < text.length) {
+        int bestMatchIndex = -1;
+        String bestTerm = '';
+
+        // Find the earliest matching term from current position
+        for (final term in terms) {
+          final index = lowerText.indexOf(term, currentIndex);
+          if (index != -1) {
+            if (bestMatchIndex == -1 || index < bestMatchIndex) {
+              bestMatchIndex = index;
+              bestTerm = term;
+            } else if (index == bestMatchIndex &&
+                term.length > bestTerm.length) {
+              // Prefer longer matches if they start at same position (e.g. "hello" vs "he")
+              bestTerm = term;
+            }
+          }
+        }
+
+        if (bestMatchIndex != -1) {
+          // Add text before match
+          if (bestMatchIndex > currentIndex) {
+            spans.add(
+              TextSpan(
+                text: text.substring(currentIndex, bestMatchIndex),
+                style: TextStyle(
+                  color: isMe ? Colors.white : Colors.black87,
+                  fontSize: 16,
+                ),
+              ),
+            );
+          }
+
+          // Add highlighted match
           spans.add(
             TextSpan(
-              text: text.substring(start, indexOfHighlight),
+              text: text.substring(
+                bestMatchIndex,
+                bestMatchIndex + bestTerm.length,
+              ),
+              style: TextStyle(
+                color: isMe
+                    ? Colors.black87
+                    : Colors.black, // Ensure visibility
+                backgroundColor: Colors.yellow,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          );
+
+          currentIndex = bestMatchIndex + bestTerm.length;
+        } else {
+          // No more matches
+          spans.add(
+            TextSpan(
+              text: text.substring(currentIndex),
               style: TextStyle(
                 color: isMe ? Colors.white : Colors.black87,
                 fontSize: 16,
               ),
             ),
           );
+          break;
         }
-
-        spans.add(
-          TextSpan(
-            text: text.substring(
-              indexOfHighlight,
-              indexOfHighlight + lowerHighlight.length,
-            ),
-            style: TextStyle(
-              color: isMe ? Colors.black87 : Colors.black, // Ensure visibility
-              backgroundColor: Colors.yellow,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-        );
-
-        start = indexOfHighlight + lowerHighlight.length;
-      }
-
-      if (start < text.length) {
-        spans.add(
-          TextSpan(
-            text: text.substring(start),
-            style: TextStyle(
-              color: isMe ? Colors.white : Colors.black87,
-              fontSize: 16,
-            ),
-          ),
-        );
       }
 
       return spans;

@@ -66,15 +66,27 @@ class ChatProvider extends ChangeNotifier {
 
   void searchMessages(String query) {
     _searchQuery = query;
-    _matchIndices = [];
-    _currentMatchIndex = -1;
-
     if (query.trim().isNotEmpty) {
-      final lowerQuery = query.trim().toLowerCase();
-      // Find matches. Note: _messages is usually oldest to newest.
+      final terms = query
+          .trim()
+          .toLowerCase()
+          .split(' ')
+          .where((t) => t.isNotEmpty)
+          .toList();
+
+      // Find matches where ALL terms are present in the message
       for (int i = 0; i < _messages.length; i++) {
         final msgText = _messages[i].text.toLowerCase();
-        if (msgText.contains(lowerQuery)) {
+
+        bool allTermsPresent = true;
+        for (final term in terms) {
+          if (!msgText.contains(term)) {
+            allTermsPresent = false;
+            break;
+          }
+        }
+
+        if (allTermsPresent) {
           _matchIndices.add(i);
         }
       }
