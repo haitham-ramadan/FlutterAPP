@@ -164,25 +164,55 @@ class _ChatScreenState extends State<ChatScreen> {
                     );
                   }
 
-                  // Reverse the list for display if we want latest at bottom with reverse: true
+                  // Reverse the list for display
                   final displayMessages = messages.reversed.toList();
 
-                  return ListView.builder(
-                    reverse: true,
-                    itemCount: displayMessages.length,
-                    itemBuilder: (context, index) {
-                      final msg = displayMessages[index];
-                      // Assign global key if needed
-                      if (!_messageKeys.containsKey(msg.id)) {
-                        _messageKeys[msg.id] = GlobalKey();
-                      }
+                  return Stack(
+                    children: [
+                      ListView.builder(
+                        // Cache extent ensures invisible items are built, allowing scroll-to-key to work.
+                        // Essential for "jump to match" functionality.
+                        cacheExtent: 10000.0,
+                        reverse: true,
+                        itemCount: displayMessages.length,
+                        itemBuilder: (context, index) {
+                          final msg = displayMessages[index];
+                          // Assign global key if needed
+                          if (!_messageKeys.containsKey(msg.id)) {
+                            _messageKeys[msg.id] = GlobalKey();
+                          }
 
-                      return MessageBubble(
-                        key: _messageKeys[msg.id],
-                        message: msg,
-                        highlightText: searchQuery,
-                      );
-                    },
+                          return MessageBubble(
+                            key: _messageKeys[msg.id],
+                            message: msg,
+                            highlightText: searchQuery,
+                          );
+                        },
+                      ),
+                      if (searchQuery.isNotEmpty &&
+                          chatProvider.matchIndices.isEmpty)
+                        Positioned(
+                          top: 10,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black87,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text(
+                                'No results found',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   );
                 },
               ),

@@ -69,15 +69,12 @@ class ChatProvider extends ChangeNotifier {
     _matchIndices = [];
     _currentMatchIndex = -1;
 
-    if (query.isNotEmpty) {
-      final lowerQuery = query.toLowerCase();
+    if (query.trim().isNotEmpty) {
+      final lowerQuery = query.trim().toLowerCase();
       // Find matches. Note: _messages is usually oldest to newest.
-      // We might want to traverse reversed if we want "find previous" to match bottom-up
-      // But standard "find next" usually goes top-down or finding user expectation.
-      // WhatsApp style: usually jumps to the *most recent* match first?
-      // Let's find all matches first.
       for (int i = 0; i < _messages.length; i++) {
-        if (_messages[i].text.toLowerCase().contains(lowerQuery)) {
+        final msgText = _messages[i].text.toLowerCase();
+        if (msgText.contains(lowerQuery)) {
           _matchIndices.add(i);
         }
       }
